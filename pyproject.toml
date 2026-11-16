@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scanpdf-studio"
+version = "0.1.0"
+description = "Local Chinese scanned book OCR and reflowable EPUB 3 desktop studio"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "PySide6>=6.8,<7", "PyMuPDF>=1.25,<2", "paddleocr==3.3.2",
+  "paddlepaddle==3.2.2", "opencv-contrib-python>=4.10,<5",
+  "Pillow>=11", "lxml>=5", "requests>=2.32"
+]
+
+[project.scripts]
+scanpdf-studio = "scanpdf.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
