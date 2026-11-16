@@ -14,6 +14,7 @@ from scanpdf.core.ocr_engine import parse_result
 from scanpdf.core.paragraph_builder import build_paragraphs, join_text, normalize_text
 from scanpdf.core.pdf_loader import PDFDocument
 from scanpdf.core.reading_order import reading_order
+from scanpdf.core.text_normalizer import to_simplified_chinese
 from scanpdf.models import Block, Page, Paragraph, Settings, rectangle
 
 
@@ -54,6 +55,24 @@ def test_ocr_result_parsing_and_confidence():
     assert blocks[1].confidence == pytest.approx(0.82)
     assert blocks[0].page_number == 3
     assert blocks[0].rect == (10, 20, 90, 50)
+
+
+def test_simplified_chinese_mode_converts_ocr_text_without_losing_raw_result():
+    texts = ["這是一個測試，臺灣與香港。", "後臺軟體裡面的資料", "乾燥與乾隆"]
+    raw = {"res": {
+        "rec_texts": list(texts),
+        "rec_scores": [0.97, 0.96, 0.95],
+        "rec_polys": [[[10, 20], [190, 20], [190, 50], [10, 50]]] * 3,
+    }}
+
+    blocks = parse_result(raw, 1, language="ch")
+    assert [item.text for item in blocks] == [
+        "这是一个测试，台湾与香港。", "后台软体里面的资料", "干燥与乾隆"]
+    assert raw["res"]["rec_texts"] == texts
+
+    retained = parse_result(raw, 1, language="chinese_cht")
+    assert [item.text for item in retained] == texts
+    assert to_simplified_chinese("English 123") == "English 123"
 
 
 def test_reading_order_is_column_aware():
@@ -103,6 +122,30 @@ def test_paragraph_reconstruction_and_cross_page():
     assert join_text("中文", "continue") == "中文continue"
     assert join_text("hello", "world") == "hello world"
     assert normalize_text("中 文 字　测试 ， 完成") == "中文字　测试，完成"
+
+
+def test_export_normalizes_existing_traditional_blocks_and_table_cells(tmp_path):
+    page = Page(1, 560, 800, [
+        block("後臺軟體裡的資料。", 48, 60, 500, 90),
+        Block(1, "臺灣資料", 0.96, rectangle(60, 120, 500, 160),
+              block_type="table", cells=[["臺灣", "資料"], ["測試", "完成"]]),
+    ])
+    paragraphs = build_paragraphs([page], Settings(language="ch"))
+    assert paragraphs[0].text == "后台软体里的资料。"
+    assert paragraphs[1].cells == [["台湾", "资料"], ["测试", "完成"]]
+
+    retained = build_paragraphs([page], Settings(language="chinese_cht"))
+    assert retained[0].text == "後臺軟體裡的資料。"
+    assert retained[1].cells == [["臺灣", "資料"], ["測試", "完成"]]
+
+    output = tmp_path / "simplified.epub"
+    build_epub({"title": "简繁测试", "author": "测试", "directory": str(tmp_path)},
+               paragraphs, output, Settings(language="ch"))
+    with zipfile.ZipFile(output) as archive:
+        chapter = archive.read("OEBPS/text/chapter-0001.xhtml").decode("utf-8")
+        assert "后台软体里的资料。" in chapter
+        assert "<td>台湾</td>" in chapter
+        assert "後臺" not in chapter
 
 
 def test_chapter_detection_uses_geometry_and_pattern():

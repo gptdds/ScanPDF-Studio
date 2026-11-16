@@ -15,7 +15,7 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("ScanPDF Studio")
     app.setOrganizationName("ScanPDF Studio")
-    app.setApplicationVersion("0.1.0")
+    app.setApplicationVersion("0.1.1")
     app.setFont(QFont("Microsoft YaHei UI", 9))
     icon = bundled_root() / "resources" / "icon.png"
     if icon.exists():

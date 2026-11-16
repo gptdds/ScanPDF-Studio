@@ -38,6 +38,7 @@ The portable build uses shared Qt/PySide6 DLLs. Distributors must preserve appli
 | NumPy | 2.2.6 | BSD-3-Clause and bundled notices | https://github.com/numpy/numpy |
 | lxml | 6.1.3 | BSD-3-Clause | https://github.com/lxml/lxml |
 | requests | 2.34.2 | Apache-2.0 | https://github.com/psf/requests |
+| OpenCC Python | 0.1.7 | Apache-2.0 | https://github.com/yichen0831/opencc-python |
 
 ## Bundled Transitive Components
 

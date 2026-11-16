@@ -76,7 +76,9 @@ class PreferencesPage(QWidget):
                                           self.contrast, self.binarize)):
             checks.addWidget(checkbox, index // 2, index % 2)
         ocr_layout.addLayout(checks)
-        note = QLabel("二值化会丢弃纸张纹理，通常不需要启用。质量模式使用更大的检测和识别模型，耗时更高。")
+        note = QLabel("简体中文模式会把模型误识别的繁体字形转换为简体；繁体中文模式保留原字形。"
+                      "二值化会丢弃纸张纹理，通常不需要启用。"
+                      "质量模式使用更大的检测和识别模型，耗时更高。")
         note.setObjectName("Meta")
         note.setWordWrap(True)
         ocr_layout.addWidget(note)

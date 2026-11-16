@@ -6,7 +6,7 @@ from pathlib import Path
 os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
 
 datas, binaries, hiddenimports = [], [], []
-for package in ("paddle", "paddlex", "paddleocr", "cv2", "lxml"):
+for package in ("paddle", "paddlex", "paddleocr", "cv2", "lxml", "opencc"):
     try:
         package_datas, package_binaries, package_hidden = collect_all(package)
         datas += package_datas
@@ -31,7 +31,7 @@ if Path("resources").exists():
 datas += copy_metadata("paddlex", recursive=True)
 for distribution in (
     "imagesize", "opencv-contrib-python", "pyclipper", "pypdfium2",
-    "python-bidi", "shapely",
+    "python-bidi", "shapely", "opencc-python-reimplemented",
 ):
     datas += copy_metadata(distribution)
 

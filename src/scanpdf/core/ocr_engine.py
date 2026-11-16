@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from scanpdf.models import Block
+from scanpdf.core.text_normalizer import to_simplified_chinese
 from scanpdf.services.model_manager import ensure_model
 from scanpdf.services.paths import ascii_data_dir
 
@@ -40,7 +41,7 @@ def serializable(value):
     return str(value)
 
 
-def parse_result(result, page_number):
+def parse_result(result, page_number, language=None):
     data = result.get("res", result)
     texts = data.get("rec_texts", [])
     scores = data.get("rec_scores", [])
@@ -48,7 +49,9 @@ def parse_result(result, page_number):
     if not (len(texts) == len(scores) == len(polygons)):
         raise ValueError("OCR 返回的文本、坐标和置信度数量不一致。")
     return [
-        Block(page_number=page_number, text=str(text), confidence=float(score),
+        Block(page_number=page_number,
+              text=to_simplified_chinese(text) if language == "ch" else str(text),
+              confidence=float(score),
               bounding_box=np.asarray(polygon, dtype=float).tolist(), reading_order=index)
         for index, (text, score, polygon) in enumerate(zip(texts, scores, polygons))
     ]
@@ -56,6 +59,7 @@ def parse_result(result, page_number):
 
 class PaddleEngine(OCREngine):
     def __init__(self, settings, progress=lambda message: None, cancel=lambda: False):
+        self.language = settings.language
         os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
         os.environ.setdefault("PADDLE_PDX_MODEL_SOURCE", "BOS")
         os.environ.setdefault("FLAGS_enable_pir_api", "1")
@@ -110,7 +114,7 @@ class PaddleEngine(OCREngine):
         if len(results) != 1:
             raise ValueError(f"OCR 单页结果数量异常: {len(results)}")
         raw = serializable(dict(results[0]))
-        return parse_result(raw, page_number), raw
+        return parse_result(raw, page_number, self.language), raw
 
 
 @contextmanager

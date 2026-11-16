@@ -1,4 +1,5 @@
 -e .
+opencc-python-reimplemented==0.1.7
 pytest>=8
 pyinstaller>=6.11
 reportlab>=4

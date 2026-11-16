@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         theme_button.clicked.connect(self.toggle_theme)
         self.theme_button = theme_button
         side_layout.addWidget(theme_button)
-        version = QLabel("0.1.0 · 本地处理")
+        version = QLabel("0.1.1 · 本地处理")
         version.setObjectName("Meta")
         side_layout.addWidget(version)
         shell.addWidget(sidebar)

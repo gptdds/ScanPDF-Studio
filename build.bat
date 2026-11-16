@@ -35,7 +35,7 @@ copy /Y THIRD_PARTY_LICENSES.md "dist\ScanPDFStudio\THIRD_PARTY_LICENSES.md" >nu
 if errorlevel 1 exit /b 1
 xcopy /E /I /Y licenses "dist\ScanPDFStudio\licenses" >nul
 if errorlevel 1 exit /b 1
-powershell -NoProfile -Command "Compress-Archive -Path 'dist\ScanPDFStudio\*' -DestinationPath 'dist\ScanPDFStudio-portable.zip' -Force"
+".venv\Scripts\python.exe" -c "import shutil; shutil.make_archive(r'dist\ScanPDFStudio-portable', 'zip', r'dist\ScanPDFStudio')"
 if errorlevel 1 exit /b 1
 echo Build complete: dist\ScanPDFStudio and dist\ScanPDFStudio-portable.zip
 

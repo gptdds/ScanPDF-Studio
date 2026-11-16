@@ -1,5 +1,6 @@
 import re
 
+from scanpdf.core.text_normalizer import normalize_cells, to_simplified_chinese
 from scanpdf.models import Paragraph
 
 ENDING = re.compile(r"[。！？!?；;：:」』”’）)]$")
@@ -40,7 +41,12 @@ def build_paragraphs(pages, settings):
         for block in page.blocks:
             if block.excluded:
                 continue
-            text = normalize_text(block.text)
+            text = block.text
+            cells = block.cells
+            if settings.language == "ch":
+                text = to_simplified_chinese(text)
+                cells = normalize_cells(cells)
+            text = normalize_text(text)
             special = block.block_type not in ("body",)
             merge = False
             if result and previous_block and not special and result[-1].block_type == "body":
@@ -74,7 +80,7 @@ def build_paragraphs(pages, settings):
             else:
                 result.append(Paragraph(text=text, block_type=block.block_type,
                                         level=block.chapter_level, block_ids=[block.id],
-                                        asset=block.asset, cells=block.cells, mathml=block.mathml))
+                                        asset=block.asset, cells=cells, mathml=block.mathml))
             block.paragraph_id = result[-1].block_ids[0]
             previous_block, previous_page = block, page
     return result
